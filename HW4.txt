@@ -1,0 +1,240 @@
+﻿1.
+-- Створення бази даних 
+CREATE DATABASE LibraryManagement;
+
+
+ -- Використання схеми 
+USE LibraryManagement; 
+
+
+-- Таблиця "authors" 
+CREATE TABLE authors ( 
+  author_id INT AUTO_INCREMENT PRIMARY KEY,
+  author_name VARCHAR(255) NOT NULL ); 
+
+
+-- Таблиця "genres" 
+CREATE TABLE genres (
+ genre_id INT AUTO_INCREMENT PRIMARY KEY, 
+ genre_name VARCHAR(255) NOT NULL );
+
+
+-- Таблиця "books" 
+CREATE TABLE books ( 
+ book_id INT AUTO_INCREMENT PRIMARY KEY, 
+ title VARCHAR(255) NOT NULL, 
+ publication_year YEAR NOT NULL, 
+ author_id INT, 
+ genre_id INT, 
+ FOREIGN KEY (author_id) REFERENCES authors(author_id), 
+ FOREIGN KEY (genre_id) REFERENCES genres(genre_id) ); 
+
+
+-- Таблиця "users" 
+CREATE TABLE users ( 
+  user_id INT AUTO_INCREMENT PRIMARY KEY, 
+  username VARCHAR(255) NOT NULL, email VARCHAR(255) NOT NULL ); 
+
+
+-- Таблиця "borrowed_books" 
+CREATE TABLE borrowed_books ( 
+borrow_id INT AUTO_INCREMENT PRIMARY KEY, 
+book_id INT, 
+user_id INT, 
+borrow_date DATE NOT NULL, 
+return_date DATE, 
+FOREIGN KEY (book_id) REFERENCES books(book_id), 
+FOREIGN KEY (user_id) REFERENCES users(user_id) );
+
+
+
+
+
+
+
+
+2.
+
+
+-- Заповнення таблиці "authors"
+INSERT INTO authors (author_name)
+VALUES 
+('George Orwell'),
+('J.K. Rowling');
+
+
+-- Заповнення таблиці "genres"
+INSERT INTO genres (genre_name)
+VALUES 
+('Dystopian'),
+('Fantasy');
+
+
+-- Заповнення таблиці "books"
+INSERT INTO books (title, publication_year, author_id, genre_id)
+VALUES 
+('1984', 1949, 1, 1),
+('Harry Potter and the Philosopher\'s Stone', 1997, 2, 2);
+
+
+-- Заповнення таблиці "users"
+INSERT INTO users (username, email)
+VALUES 
+('John Doe', 'john.doe@example.com'),
+('Jane Smith', 'jane.smith@example.com');
+
+
+-- Заповнення таблиці "borrowed_books"
+INSERT INTO borrowed_books (book_id, user_id, borrow_date, return_date)
+VALUES 
+(1, 1, '2024-11-01', '2024-11-15'),
+(2, 2, '2024-11-10')
+
+
+3. 
+use hw1;
+SELECT 
+    *
+FROM hw1.orders
+INNER JOIN hw1.customers ON hw1.orders.customer_id = hw1.customers.id
+INNER JOIN hw1.employees ON hw1.orders.employee_id = hw1.employees.employee_id
+INNER JOIN hw1.order_details ON hw1.orders.id = hw1.order_details.order_id
+INNER JOIN hw1.shippers ON hw1.orders.shipper_id = hw1.shippers.id
+inner join hw1.products on hw1.order_details.product_id = hw1.products.id
+inner join hw1.categories on hw1.products.category_id = hw1.categories.id
+inner join hw1.suppliers on hw1.products.supplier_id = hw1.suppliers.id;
+
+
+4.
+4.1.
+use hw1;
+SELECT 
+    count(*)
+FROM hw1.orders
+INNER JOIN hw1.customers ON hw1.orders.customer_id = hw1.customers.id
+INNER JOIN hw1.employees ON hw1.orders.employee_id = hw1.employees.employee_id
+INNER JOIN hw1.order_details ON hw1.orders.id = hw1.order_details.order_id
+INNER JOIN hw1.shippers ON hw1.orders.shipper_id = hw1.shippers.id
+inner join hw1.products on hw1.order_details.product_id = hw1.products.id
+inner join hw1.categories on hw1.products.category_id = hw1.categories.id
+inner join hw1.suppliers on hw1.products.supplier_id = hw1.suppliers.id;
+
+
+4.2.
+use hw1;
+SELECT 
+    count(*)
+FROM hw1.orders
+LEFT JOIN hw1.customers ON hw1.orders.customer_id = hw1.customers.id
+LEFT JOIN hw1.employees ON hw1.orders.employee_id = hw1.employees.employee_id
+LEFT JOIN hw1.order_details ON hw1.orders.id = hw1.order_details.order_id
+LEFT JOIN hw1.shippers ON hw1.orders.shipper_id = hw1.shippers.id
+LEFT join hw1.products on hw1.order_details.product_id = hw1.products.id
+inner join hw1.categories on hw1.products.category_id = hw1.categories.id
+inner join hw1.suppliers on hw1.products.supplier_id = hw1.suppliers.id;
+
+
+При зміні кількість рядків не змінилася.
+Всі записи в таблиці orders мають відповідні записи у пов'язаних таблицях:
+* customer_id в таблиці orders завжди вказує на існуючого клієнта в таблиці customers.
+* employee_id завжди вказує на існуючого працівника в таблиці employees.
+* Аналогічно, order_id обов'язково пов'язаний із записами в таблиці order_details, а shipper_id з таблицею shippers.
+Якщо ці зв'язки є обов’язковими, то різниці між INNER JOIN і LEFT JOIN не буде, оскільки жодного "неповного" рядка не існує.
+
+
+518 rows
+
+
+4.3.
+use hw1;
+SELECT 
+    count(*)
+FROM hw1.orders
+LEFT JOIN hw1.customers ON hw1.orders.customer_id = hw1.customers.id
+LEFT JOIN hw1.employees ON hw1.orders.employee_id = hw1.employees.employee_id
+LEFT JOIN hw1.order_details ON hw1.orders.id = hw1.order_details.order_id
+LEFT JOIN hw1.shippers ON hw1.orders.shipper_id = hw1.shippers.id
+LEFT join hw1.products on hw1.order_details.product_id = hw1.products.id
+inner join hw1.categories on hw1.products.category_id = hw1.categories.id
+inner join hw1.suppliers on hw1.products.supplier_id = hw1.suppliers.id
+where hw1.employees.employee_id > 3 and hw1.employees.employee_id <= 10;
+
+
+317 rows
+
+
+4.4.
+-- Згрупуйте за іменем категорії, порахуйте кількість рядків у групі, середню кількість товару (кількість товару знаходиться в order_details.quantity)
+use hw1;
+SELECT 
+    count(*), avg(hw1.order_details.quantity), hw1.categories.name
+FROM hw1.orders
+LEFT JOIN hw1.customers ON hw1.orders.customer_id = hw1.customers.id
+LEFT JOIN hw1.employees ON hw1.orders.employee_id = hw1.employees.employee_id
+LEFT JOIN hw1.order_details ON hw1.orders.id = hw1.order_details.order_id
+LEFT JOIN hw1.shippers ON hw1.orders.shipper_id = hw1.shippers.id
+LEFT join hw1.products on hw1.order_details.product_id = hw1.products.id
+inner join hw1.categories on hw1.products.category_id = hw1.categories.id
+inner join hw1.suppliers on hw1.products.supplier_id = hw1.suppliers.id
+where hw1.employees.employee_id > 3 and hw1.employees.employee_id <= 10
+group by hw1.categories.name;
+
+
+
+
+4.5.
+use hw1;
+-- Відфільтруйте рядки, де середня кількість товару більша за 21.
+SELECT 
+    count(*), avg(hw1.order_details.quantity), hw1.categories.name
+FROM hw1.orders
+LEFT JOIN hw1.customers ON hw1.orders.customer_id = hw1.customers.id
+LEFT JOIN hw1.employees ON hw1.orders.employee_id = hw1.employees.employee_id
+LEFT JOIN hw1.order_details ON hw1.orders.id = hw1.order_details.order_id
+LEFT JOIN hw1.shippers ON hw1.orders.shipper_id = hw1.shippers.id
+LEFT join hw1.products on hw1.order_details.product_id = hw1.products.id
+inner join hw1.categories on hw1.products.category_id = hw1.categories.id
+inner join hw1.suppliers on hw1.products.supplier_id = hw1.suppliers.id
+where hw1.employees.employee_id > 3 and hw1.employees.employee_id <= 10
+group by hw1.categories.name
+having avg(hw1.order_details.quantity) > 21
+
+
+4.6.
+use hw1;
+SELECT 
+    count(*), avg(hw1.order_details.quantity), hw1.categories.name
+FROM hw1.orders
+LEFT JOIN hw1.customers ON hw1.orders.customer_id = hw1.customers.id
+LEFT JOIN hw1.employees ON hw1.orders.employee_id = hw1.employees.employee_id
+LEFT JOIN hw1.order_details ON hw1.orders.id = hw1.order_details.order_id
+LEFT JOIN hw1.shippers ON hw1.orders.shipper_id = hw1.shippers.id
+LEFT join hw1.products on hw1.order_details.product_id = hw1.products.id
+inner join hw1.categories on hw1.products.category_id = hw1.categories.id
+inner join hw1.suppliers on hw1.products.supplier_id = hw1.suppliers.id
+where hw1.employees.employee_id > 3 and hw1.employees.employee_id <= 10
+group by hw1.categories.name
+having avg(hw1.order_details.quantity) > 21
+order by count(*) DESC
+
+
+
+
+4.7
+use hw1;
+-- Виведіть на екран (оберіть) чотири рядки з пропущеним першим рядком.
+SELECT 
+    count(*), avg(hw1.order_details.quantity), hw1.categories.name
+FROM hw1.orders
+LEFT JOIN hw1.customers ON hw1.orders.customer_id = hw1.customers.id
+LEFT JOIN hw1.employees ON hw1.orders.employee_id = hw1.employees.employee_id
+LEFT JOIN hw1.order_details ON hw1.orders.id = hw1.order_details.order_id
+LEFT JOIN hw1.shippers ON hw1.orders.shipper_id = hw1.shippers.id
+LEFT join hw1.products on hw1.order_details.product_id = hw1.products.id
+inner join hw1.categories on hw1.products.category_id = hw1.categories.id
+inner join hw1.suppliers on hw1.products.supplier_id = hw1.suppliers.id
+where hw1.employees.employee_id > 3 and hw1.employees.employee_id <= 10
+group by hw1.categories.name
+having avg(hw1.order_details.quantity) > 21
+order by count(*) DESC
+LIMIT 4 OFFSET 1
